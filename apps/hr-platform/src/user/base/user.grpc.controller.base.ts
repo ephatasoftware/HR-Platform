@@ -16,20 +16,20 @@ import * as errors from "../../errors";
 import { Request } from "express";
 import { plainToClass } from "class-transformer";
 import { ApiNestedQuery } from "../../decorators/api-nested-query.decorator";
+import { GrpcMethod } from "@nestjs/microservices";
 import { UserService } from "../user.service";
 import { UserCreateInput } from "./UserCreateInput";
-import { User } from "./User";
-import { UserFindManyArgs } from "./UserFindManyArgs";
+import { UserWhereInput } from "./UserWhereInput";
 import { UserWhereUniqueInput } from "./UserWhereUniqueInput";
+import { UserFindManyArgs } from "./UserFindManyArgs";
 import { UserUpdateInput } from "./UserUpdateInput";
+import { User } from "./User";
 
-export class UserControllerBase {
+export class UserGrpcControllerBase {
   constructor(protected readonly service: UserService) {}
   @common.Post()
   @swagger.ApiCreatedResponse({ type: User })
-  @swagger.ApiBody({
-    type: UserCreateInput,
-  })
+  @GrpcMethod("UserService", "createUser")
   async createUser(@common.Body() data: UserCreateInput): Promise<User> {
     return await this.service.createUser({
       data: data,
@@ -49,6 +49,7 @@ export class UserControllerBase {
   @common.Get()
   @swagger.ApiOkResponse({ type: [User] })
   @ApiNestedQuery(UserFindManyArgs)
+  @GrpcMethod("UserService", "users")
   async users(@common.Req() request: Request): Promise<User[]> {
     const args = plainToClass(UserFindManyArgs, request.query);
     return this.service.users({
@@ -69,6 +70,7 @@ export class UserControllerBase {
   @common.Get("/:id")
   @swagger.ApiOkResponse({ type: User })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @GrpcMethod("UserService", "user")
   async user(
     @common.Param() params: UserWhereUniqueInput
   ): Promise<User | null> {
@@ -96,9 +98,7 @@ export class UserControllerBase {
   @common.Patch("/:id")
   @swagger.ApiOkResponse({ type: User })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
-  @swagger.ApiBody({
-    type: UserUpdateInput,
-  })
+  @GrpcMethod("UserService", "updateUser")
   async updateUser(
     @common.Param() params: UserWhereUniqueInput,
     @common.Body() data: UserUpdateInput
@@ -131,6 +131,7 @@ export class UserControllerBase {
   @common.Delete("/:id")
   @swagger.ApiOkResponse({ type: User })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @GrpcMethod("UserService", "deleteUser")
   async deleteUser(
     @common.Param() params: UserWhereUniqueInput
   ): Promise<User | null> {

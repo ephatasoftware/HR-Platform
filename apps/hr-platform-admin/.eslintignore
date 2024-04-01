@@ -10,8 +10,3 @@
  
 # production
 /build
-/dist
-
-#Server Specific
-prisma/migrations/
-package-lock.json
